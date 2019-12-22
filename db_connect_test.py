@@ -1,6 +1,6 @@
 from mysql.connector import Error, MySQLConnection
 from python_mysql_dbconfig import read_db_config
-import cv2
+# import cv2
 import numpy as np
 import _pickle as cPickle
 ########################################################################################################################
@@ -90,27 +90,27 @@ def createNewId():
 # ADD IMAGE
 
 
-def addImg():
-
-    #  ./Data/emilfine2.jpg
-    #  ./Data/test.jpg
-    conn = connect()
-    cursor = conn.cursor()
-
-    imgpath = input("Enter Path: ")
-    img_gray = cv2.imread(imgpath, cv2.IMREAD_GRAYSCALE)  # Load Image in Grayscale
-    query = ("INSERT INTO `mvp`.`data` (type_id, data) VALUES (%s, %s);")
-    cursor.execute(query, ("image", cPickle.dumps(img_gray)))
-    conn.commit()
-
-    query = ("SELECT LAST_INSERT_ID()")
-    cursor.execute(query)
-
-    for ID in cursor:
-        print(ID)
-
-    cursor.close()
-    close(conn)
+# def addImg():
+#
+#     #  ./Data/emilfine2.jpg
+#     #  ./Data/test.jpg
+#     conn = connect()
+#     cursor = conn.cursor()
+#
+#     imgpath = input("Enter Path: ")
+#     # img_gray = cv2.imread(imgpath, cv2.IMREAD_GRAYSCALE)  # Load Image in Grayscale
+#     query = ("INSERT INTO `mvp`.`data` (type_id, data) VALUES (%s, %s);")
+#     cursor.execute(query, ("image", cPickle.dumps(img_gray)))
+#     conn.commit()
+#
+#     query = ("SELECT LAST_INSERT_ID()")
+#     cursor.execute(query)
+#
+#     for ID in cursor:
+#         print(ID)
+#
+#     cursor.close()
+#     close(conn)
 
 
 
@@ -147,7 +147,8 @@ elif input("Create new ID? y/n: ").lower() == 'y'.strip():
 
 
 if input("Add new image? y/n: ").lower() == 'y'.strip():
-    imgData = addImg()
+    # imgData = addImg()
+    print("Need Function")
 print()
 
 
