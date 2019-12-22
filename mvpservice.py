@@ -137,7 +137,7 @@ def hello2():
 if platform.system() == 'Windows':
     app.run(host='0.0.0.0', port=5000)
 else:
-    app.run(host='172.31.87.215', port=80)
+    app.run(host='172.31.87.59', port=80)
 
 '''
 CONNECTIONS 
@@ -149,6 +149,10 @@ Use in Code: Private IP: 172.31.90.152
 New EC2: webservice2
 Use in Browser: Public IP: http://18.205.29.255/
 Use in Code: Private IP: 172.31.87.215
+
+New EC2: webservice2
+Use in Browser: Public IP: http://3.92.175.47/
+Use in Code: Private IP: 172.31.87.59
 
 '''
 ########################################################################################################################
