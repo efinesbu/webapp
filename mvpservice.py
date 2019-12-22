@@ -2,6 +2,7 @@ from flask import Flask, request
 import platform
 import tempfile
 import os
+from os.path import join as pjoin
 
 app = Flask(__name__)
 
@@ -84,16 +85,24 @@ def receivedata():
             # filename = secure_filename(file.filename)
             filename, file_extension = os.path.splitext(file.filename)
             # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            filename = tempfile.mktemp(suffix=file_extension) # [, prefix = 'tmp'[, dir = None]]])
-            print(filename)
-            file.save(filename)
+            print("Name of file uploaded: ", filename)
+            if platform.system() == 'Windows':
+                filenamepath = ["C:/Users/Emil/Downloads/", filename,'USER_ID', file_extension]
+            else:
+                filenamepath = ["/home/ec2-user/mountstorage/", filename,'USER_ID', file_extension]
+            filepath = "".join(filenamepath)
+
+
+            # filepath = tempfile.mktemp(suffix=file_extension) # [, prefix = 'tmp'[, dir = None]]])
+            print("File Path to save: ", filepath)
+            file.save(filepath)
             return f"""
                 <hr>
-                save = {filename}
+                save = {filepath}
                 <hr>
             """
             return redirect(url_for('uploaded_file',
-                                    filename=filename))
+                                    filename=pathtofile))
     return '''
     <!doctype html>
     <title>Upload new File</title>
@@ -113,7 +122,6 @@ def receivedata():
         {files}<br>
 </code>
 """
-
 
 @app.route("/ha")
 def hello1():
