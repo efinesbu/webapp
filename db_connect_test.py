@@ -145,10 +145,9 @@ if input("Do you have a user id? y/n: ").lower() == 'y'.strip():
 elif input("Create new ID? y/n: ").lower() == 'y'.strip():
     author = createNewId()  # returns tuple (author_id, nickname)
 
-
 if input("Add new image? y/n: ").lower() == 'y'.strip():
     # imgData = addImg()
     print("Need Function")
-print()
+
 
 

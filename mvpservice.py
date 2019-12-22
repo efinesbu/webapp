@@ -2,7 +2,9 @@ from flask import Flask, request
 import platform
 import tempfile
 import os
-from os.path import join as pjoin
+from mysql.connector import Error, MySQLConnection
+from python_mysql_dbconfig import read_db_config
+
 
 app = Flask(__name__)
 
@@ -144,8 +146,131 @@ Original EC2
 Use in Browser: Public IP: http://3.88.217.30/
 Use in Code: Private IP: 172.31.90.152
 
-Permissioned EC2: webservice2
+New EC2: webservice2
 Use in Browser: Public IP: http://18.205.29.255/
 Use in Code: Private IP: 172.31.87.215
 
 '''
+########################################################################################################################
+# FUNCTIONS
+
+# CONNECT TO CLOUD DB
+
+def connect():
+    db_config = read_db_config()
+    conn = None
+    try:
+        print("Connecting to MySQL DB...")
+        conn = MySQLConnection(**db_config)
+
+        if conn.is_connected():
+            print("Connected established.")
+        else:
+            print("Connection failed.")
+
+    except Error as error:
+        print(error)
+
+    return conn
+###############################################################
+# DISCONNECT FROM CLOUD DB
+
+
+def close(conn):
+    if conn is not None and conn.is_connected():
+            conn.close()
+            print('Connection closed.')
+
+
+###############################################################
+# CHECK EXISTING USER
+
+
+def getAuthor():
+    conn = connect()
+    cursor = conn.cursor()
+
+    while True:
+        name = (input("What is your user nickname? "),)
+        query = ("SELECT * from `mvp`.`author`"
+                 "WHERE nickname  = (%s)")
+        cursor.execute(query, name)
+        for match in cursor:
+            print("Welcome", match[1])
+            cursor.close()
+            close(conn)
+            return match
+        if input("No Id Found. Try Again? y/n: ").lower() == 'y'.strip():
+            continue
+        elif input("Create new ID? y/n:  ").lower() == 'y'.strip():
+            createNewId()
+            break
+        else:
+            break
+    cursor.close()
+    close(conn)
+
+###############################################################
+# CREATE NEW USER
+
+
+def createNewId():
+    conn = connect()
+    cursor = conn.cursor()
+    while True:
+        name = (input("Create nickname: "),)
+        query = ("SELECT * from `mvp`.`author` WHERE nickname  = (%s)")
+        cursor.execute(query, name)
+        match = None
+        for match in cursor:
+            print("ID Exists, try again")
+        if not match:
+            query = ("INSERT INTO `mvp`.`author` (nickname) VALUES (%s)")
+            cursor.execute(query, name)
+            conn.commit()
+            query = ("SELECT * from `mvp`.`author` WHERE nickname  = (%s)")
+            cursor.execute(query, name)
+            for match in cursor:
+                print("Congrats, new nickname created: ", match[1])
+                return match
+            break
+    cursor.close()
+    close(conn)
+###############################################################
+# ADD IMAGE
+
+
+def addImg():
+    return
+    #  ./Data/emilfine2.jpg
+    #  ./Data/test.jpg
+    # conn = connect()
+    # cursor = conn.cursor()
+    #
+    # imgpath = input("Enter Path: ")
+    # # img_gray = cv2.imread(imgpath, cv2.IMREAD_GRAYSCALE)  # Load Image in Grayscale
+    # query = ("INSERT INTO `mvp`.`data` (type_id, data) VALUES (%s, %s);")
+    # cursor.execute(query, ("image", cPickle.dumps(img_gray)))
+    # conn.commit()
+    #
+    # query = ("SELECT LAST_INSERT_ID()")
+    # cursor.execute(query)
+    #
+    # for ID in cursor:
+    #     print(ID)
+    #
+    # cursor.close()
+    # close(conn)
+
+########################################################################################################################
+#MAIN
+
+
+if input("Do you have a user id? y/n: ").lower() == 'y'.strip():
+    author = getAuthor()  # returns tuple (author_id, nickname)
+elif input("Create new ID? y/n: ").lower() == 'y'.strip():
+    author = createNewId()  # returns tuple (author_id, nickname)
+
+if input("Add new image? y/n: ").lower() == 'y'.strip():
+    # imgData = addImg()
+    print("Need Function")
