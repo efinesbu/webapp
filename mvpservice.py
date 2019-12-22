@@ -86,14 +86,15 @@ def receivedata():
             filename, file_extension = os.path.splitext(file.filename)
             # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             print("Name of file uploaded: ", filename)
-            if platform.system() == 'Windows':
-                filenamepath = ["C:/Users/Emil/Downloads/", filename,'USER_ID', file_extension]
-            else:
-                filenamepath = ["/home/ec2-user/mountstorage/", filename,'USER_ID', file_extension]
-            filepath = "".join(filenamepath)
+
+            # if platform.system() == 'Windows':
+            #     filenamepath = ["C:/Users/Emil/Downloads/", filename,'USER_ID', file_extension]
+            # else:
+            #     filenamepath = ["/home/ec2-user/mountstorage/", filename,'USER_ID', file_extension]
+            # filepath = "".join(filenamepath)
 
 
-            # filepath = tempfile.mktemp(suffix=file_extension) # [, prefix = 'tmp'[, dir = None]]])
+            filepath = tempfile.mktemp(suffix=file_extension) # [, prefix = 'tmp'[, dir = None]]])
             print("File Path to save: ", filepath)
             file.save(filepath)
             return f"""
@@ -102,7 +103,7 @@ def receivedata():
                 <hr>
             """
             return redirect(url_for('uploaded_file',
-                                    filename=pathtofile))
+                                    filename=filepath))
     return '''
     <!doctype html>
     <title>Upload new File</title>
