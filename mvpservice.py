@@ -126,7 +126,7 @@ def hello2():
 if platform.system() == 'Windows':
     app.run(host='0.0.0.0', port=5000)
 else:
-    app.run(host='172.31.90.152', port=80)
+    app.run(host='172.31.87.215', port=80)
 
 '''
 CONNECTIONS 
