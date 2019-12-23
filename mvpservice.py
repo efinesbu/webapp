@@ -1,5 +1,5 @@
 from pprint import pprint
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import platform
 import tempfile
 import os
@@ -7,10 +7,33 @@ from mysql.connector import Error, MySQLConnection
 from python_mysql_dbconfig import read_db_config
 import db_connect_test
 
+###############################################################
 app = Flask(__name__)
+
+class InvalidUsage(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
 
 ###############################################################
 
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
+###############################################################
 @app.route("/")
 def homepage():
     return f"""<h1>Welcome to the homepage</h1>
@@ -18,14 +41,12 @@ def homepage():
         {request}<br>
 <hr>
         {request.headers}<br>
-<hr>
-        {request.data}
 </code>
     <ol>
       <li> <a href="upload">upload</a></li>
     </ol>
     """
-###############################################################
+###############################
 
 def name():
     return "pic"
@@ -38,7 +59,7 @@ NAME = 'pic'
 def upload():
     return homepage_content()
 
-###############################################################
+###############################
 
 
 def allowed_file(filename):
@@ -64,7 +85,7 @@ def allowed_file(filename):
 #         super(FS)
 #
 # def Edge(0, 1000)
-
+###############################################################
 def homepage_content():
   return f"""
         <div class="container">
@@ -74,19 +95,18 @@ def homepage_content():
           
           <form action="submit", method="post", enctype="multipart/form-data">
           
-              <input type="file" name={NAME} accept="image/* ">   <br><br><br>
+              <input type="file" name={NAME} accept="image/* ">* <br><br><br>
     
-              Nickname:<br>
+              Nickname*:<br>
               <input type="text" name="Nickname" title="Select New if New nickname">
-    
     
               <p>New?</p>
               <input type="checkbox" name="new" value="yes" title="Select if new"> Yes <br><br>
                     
               <label for="Comment">Comment</label><span class="error"> <br>
-              <textarea id="msg" name="msg" placeholder="Image Details..." style="height:100px"></textarea>
+              <textarea id="msg" name="msg" placeholder="Image Comments..." style="height:100px"></textarea>
             
-              <input value="Submit" type="submit">
+              <input value="Post" type="submit">
             
           </form>
         </div> 
@@ -102,20 +122,20 @@ def redirect(page='//localhost', port=5000):
 ###############################################################
 
 def completeDb(data):
-
-    if data.get('New'):
-        author = data.get('Nickname')
-
+    author = data.get('Nickname')
+    if data.get('new'):
         if db_connect_test.getUserId(author):
-            raise RuntimeError(f"{author} Nickname Exists")
-
-        author_id = db_connect_test.createNewId(author)
-
+            raise InvalidUsage(f"{author} Nickname Exists")
+        db_connect_test.createNewId(author)
+    author_id = db_connect_test.getUserId(author)
+    if not author_id:
+        raise InvalidUsage(f"Provided nickname: {author}, not found in database")
+    author_id = author_id[0]
     filepath = data.get('filepath')
     if filepath:
         ref_data_id = db_connect_test.createNewDataRecord(filepath)
 
-    comment = data.get('Comment')
+    comment = data.get('msg')
     if comment:
         data_id = db_connect_test.createNewDataRecord(comment, "comment")
     else:
@@ -123,6 +143,8 @@ def completeDb(data):
 
     if data_id and ref_data_id and author_id:
         db_connect_test.createNewRecord(author_id, data_id, ref_data_id)
+    else:
+        raise InvalidUsage(f"Missing paramater {data}")
 
     pprint(data)
 
@@ -133,8 +155,6 @@ def receivedata():
     if request.method == 'POST':
 
         data = request.form.to_dict()
-
-
 
         # check if the post request has the file part
         if NAME not in request.files:
@@ -178,16 +198,13 @@ def receivedata():
 
 ###############################################################
 @app.route("/ha")
-
-
 def hello1():
     return "<h1>Not Much Going On Here, but ha</h1>"
 ###############################################################
 @app.route("/hi")
-
-
 def hello2():
     return "<h1>Not Much Going On Here but hi</h1>"
+###############################################################
 
 if platform.system() == 'Windows':
     app.run(host='0.0.0.0', port=5000)
@@ -235,13 +252,10 @@ def connect():
 ###############################################################
 # DISCONNECT FROM CLOUD DB
 
-
 def close(conn):
     if conn is not None and conn.is_connected():
             conn.close()
             print('Connection closed.')
-
-
 ###############################################################
 # CHECK EXISTING USER
 
@@ -296,42 +310,17 @@ def createNewId():
             break
     cursor.close()
     close(conn)
-###############################################################
-# ADD IMAGE
-
-
-def addImg():
-    return
-    #  ./Data/emilfine2.jpg
-    #  ./Data/test.jpg
-    # conn = connect()
-    # cursor = conn.cursor()
-    #
-    # imgpath = input("Enter Path: ")
-    # # img_gray = cv2.imread(imgpath, cv2.IMREAD_GRAYSCALE)  # Load Image in Grayscale
-    # query = ("INSERT INTO `mvp`.`data` (type_id, data) VALUES (%s, %s);")
-    # cursor.execute(query, ("image", cPickle.dumps(img_gray)))
-    # conn.commit()
-    #
-    # query = ("SELECT LAST_INSERT_ID()")
-    # cursor.execute(query)
-    #
-    # for ID in cursor:
-    #     print(ID)
-    #
-    # cursor.close()
-    # close(conn)
 
 ########################################################################################################################
 #MAIN
 
-
-if input("Do you have a user id? y/n: ").lower() == 'y'.strip():
-    author = getAuthor()  # returns tuple (author_id, nickname)
-elif input("Create new ID? y/n: ").lower() == 'y'.strip():
-    author = createNewId()  # returns tuple (author_id, nickname)
-
-if input("Add new image? y/n: ").lower() == 'y'.strip():
-    # imgData = addImg()
-
-    print("Need Function")
+#
+# if input("Do you have a user id? y/n: ").lower() == 'y'.strip():
+#     author = getAuthor()  # returns tuple (author_id, nickname)
+# elif input("Create new ID? y/n: ").lower() == 'y'.strip():
+#     author = createNewId()  # returns tuple (author_id, nickname)
+#
+# if input("Add new image? y/n: ").lower() == 'y'.strip():
+#
+#
+#     print("Need Function")
