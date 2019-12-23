@@ -100,7 +100,7 @@ def homepage_content():
               Nickname*:<br>
               <input type="text" name="Nickname" title="Select New if New nickname">
     
-              <p>New?</p>
+              <p>New Nickname? First Time here?</p>
               <input type="checkbox" name="new" value="yes" title="Select if new"> Yes <br><br>
                     
               <label for="Comment">Comment</label><span class="error"> <br>
@@ -125,7 +125,7 @@ def completeDb(data):
     author = data.get('Nickname')
     if data.get('new'):
         if db_connect_test.getUserId(author):
-            raise InvalidUsage(f"{author} Nickname Exists")
+            raise InvalidUsage(f"{author} Nickname is not New and already Exists")
         db_connect_test.createNewId(author)
     author_id = db_connect_test.getUserId(author)
     if not author_id:
