@@ -1,11 +1,9 @@
 from mysql.connector import Error, MySQLConnection
 from python_mysql_dbconfig import read_db_config
-# import cv2
-import numpy as np
-import _pickle as cPickle
+
 ########################################################################################################################
 # FUNCTIONS
-
+######################################################################
 # CONNECT TO CLOUD DB
 
 
@@ -25,7 +23,7 @@ def connect():
         print(error)
 
     return conn
-
+######################################################################
 # DISCONNECT FROM CLOUD DB
 
 
@@ -33,28 +31,26 @@ def close(conn):
     if conn is not None and conn.is_connected():
             conn.close()
             print('Connection closed.')
-
+######################################################################
 # CHECK EXISTING USER
 
-
-def getAuthor():
+def getAuthor(name):
     conn = connect()
     cursor = conn.cursor()
 
     while True:
-        name = (input("What is your user nickname? "),)
-        query = ("SELECT * from `mvp`.`author`"
-                 "WHERE nickname  = (%s)")
-        cursor.execute(query, name)
-        for match in cursor:
-            print("Welcome", match[1])
+        cursor =  getUserId(name)
+        for user in  cursor:
+            print("Welcome", user[1])
             cursor.close()
             close(conn)
             return match
         if input("No Id Found. Try Again? y/n: ").lower() == 'y'.strip():
             continue
         elif input("Create new ID? y/n:  ").lower() == 'y'.strip():
-            createNewId()
+            name = (input("Create nickname: "),)
+            user = getUserId(name)
+
             break
         else:
             break
@@ -63,91 +59,115 @@ def getAuthor():
 
 # CREATE NEW USER
 
-
-def createNewId():
+######################################################################
+def getUserId(name):
     conn = connect()
     cursor = conn.cursor()
-    while True:
-        name = (input("Create nickname: "),)
-        query = ("SELECT * from `mvp`.`author` WHERE nickname  = (%s)")
-        cursor.execute(query, name)
-        match = None
-        for match in cursor:
-            print("ID Exists, try again")
-        if not match:
-            query = ("INSERT INTO `mvp`.`author` (nickname) VALUES (%s)")
-            cursor.execute(query, name)
-            conn.commit()
-            query = ("SELECT * from `mvp`.`author` WHERE nickname  = (%s)")
-            cursor.execute(query, name)
-            for match in cursor:
-                print("Congrats, new nickname created: ", match[1])
-                return match
-            break
+    query = ("SELECT * from `mvp`.`author` WHERE nickname  = (%s)")
+    cursor.execute(query, name)
+    user = None
+    for user in cursor:
+        break
     cursor.close()
     close(conn)
+    return user
+######################################################################
+def createNewId(name):
+    conn = connect()
+    cursor = conn.cursor()
+    query = ("INSERT INTO `mvp`.`author` (nickname) VALUES (%s)")
+    cursor.execute(query, name)
+    conn.commit()
+    cursor.close()
+    close(conn)
+######################################################################
+def createNewDataRecord(path, type_id = 'image'):
+    conn = connect()
+    cursor = conn.cursor()
+    query = ("INSERT INTO `mvp`.`data`  (type_id, data) VALUES (%s, %s);")
+    cursor.execute(query, ("image", path))
+    conn.commit()
+    lastrowid = cursor.lastrowid
+    cursor.close()
+    close(conn)
+    return lastrowid
 
-# ADD IMAGE
-
-
-# def addImg():
-#
-#     #  ./Data/emilfine2.jpg
-#     #  ./Data/test.jpg
-#     conn = connect()
-#     cursor = conn.cursor()
-#
-#     imgpath = input("Enter Path: ")
-#     # img_gray = cv2.imread(imgpath, cv2.IMREAD_GRAYSCALE)  # Load Image in Grayscale
-#     query = ("INSERT INTO `mvp`.`data` (type_id, data) VALUES (%s, %s);")
-#     cursor.execute(query, ("image", cPickle.dumps(img_gray)))
-#     conn.commit()
-#
-#     query = ("SELECT LAST_INSERT_ID()")
-#     cursor.execute(query)
-#
-#     for ID in cursor:
-#         print(ID)
-#
-#     cursor.close()
-#     close(conn)
-
+######################################################################
+def getDataRecord(data_id):
+    conn = connect()
+    cursor = conn.cursor()
+    query = ("SELECT * from `mvp`.`data` WHERE data_id = %s;")
+    cursor.execute(query, (data_id,))
+    path = None
+    for path in cursor:
+        break
+    cursor.close()
+    close(conn)
+    return path
+######################################################################
+def getRecord(record_id):
+    conn = connect()
+    cursor = conn.cursor()
+    query = ("SELECT * from `mvp`.`record` WHERE record_id = %s;")
+    cursor.execute(query, (record_id,))
+    record = None
+    for record in cursor:
+        break
+    cursor.close()
+    close(conn)
+    return record
+######################################################################
+def createNewRecord( author_id, data_id, ref_data_id=None):
+    ref_data_id = ref_data_id or data_id
+    conn = connect()
+    cursor = conn.cursor()
+    query = ("INSERT INTO `mvp`.`record`  (author_id, data_id, ref_data_id) VALUES (%s, %s, %s);")
+    cursor.execute(query, (author_id, data_id, ref_data_id))
+    conn.commit()
+    lastrowid = cursor.lastrowid
+    cursor.close()
+    close(conn)
+    return lastrowid
 
 
 ########################################################################################################################
 # MAIN
 
-# img_gray = cv2.imread('./Data/test.jpg', cv2.IMREAD_GRAYSCALE)  # Load Image in Grayscale
 
-# SAVE METHOD
-# np.savetxt(io, img_gray)
-# s = io.getvalue()
+if __name__ == "__main__":
+    author = None
+    if input("Do you have a user id? y/n: ").lower() == 'y'.strip():
+        while not author:
+            name = (input("What is your user nickname? "),)
+            author = getUserId(name)  # returns tuple (author_id, nickname)
+            if author:
+                print(f"User {name} has been found {author}")
+            else:
+                print(f"User {name} doesn't exist")
 
-# STRING METHOD
-# a = str(img_gray)
+    if author is None and input("Create new ID? y/n: ").lower() == 'y'.strip():
+        name = (input("Create nickname: "),)
+        user = getUserId(name)
+        if user:
+            print(f"User {user} already exists")
+        else:
+            author = createNewId(name)  # returns tuple (author_id, nickname)
+            author = getUserId(name)
+            if author:
+                print(f"Congrats, new nickname created: {author}")
+    if author and input("Add new image? y/n: ").lower() == 'y'.strip():
+        path = input("What is a path of your image file?").lower()
+        data_id = createNewDataRecord(path)
+        print(f"Need Function {path} {data_id}")
+        check_record = getDataRecord(data_id)
+        print (f"We have added {check_record}")
+        author_id = author[0]
 
-#PICKLE METHOD
-# s = cPickle.dumps(img_gray)
-# a = cPickle.loads(s)
-#
-# test = np.array_repr(img_gray)
-# # print(len(test))
-# print("img.shape: \n",img_gray.shape)
-# print("repr(img): \n", test)
+        record_id = createNewRecord(author_id, data_id, ref_data_id=None)
+        #check
+        record2Check = getRecord(record_id)
+        print(f"DB has benn completed {record2Check}")
 
-
-# a = np.array(test)
-# print(len(test))
-
-
-if input("Do you have a user id? y/n: ").lower() == 'y'.strip():
-    author = getAuthor()  # returns tuple (author_id, nickname)
-elif input("Create new ID? y/n: ").lower() == 'y'.strip():
-    author = createNewId()  # returns tuple (author_id, nickname)
-
-if input("Add new image? y/n: ").lower() == 'y'.strip():
-    # imgData = addImg()
-    print("Need Function")
 
 
 

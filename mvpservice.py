@@ -4,10 +4,11 @@ import tempfile
 import os
 from mysql.connector import Error, MySQLConnection
 from python_mysql_dbconfig import read_db_config
-
+import db_connect_test
 
 app = Flask(__name__)
 
+###############################################################
 
 @app.route("/")
 def homepage():
@@ -21,54 +22,77 @@ def homepage():
 </code>
     <ol>
       <li> <a href="upload">upload</a></li>
-      <li> <a href="hi">say hi</a></li>
     </ol>
     """
+###############################################################
+
 def name():
     return "pic"
 
 NAME = 'pic'
 
+###############################################################
+
 @app.route("/upload")
 def upload():
-    return f"""
-<div class="container">
-  <hr><h3>Contact Us: </h3><hr><p></p>  <p><span class="error">* required field</span></p>
-  <form action="submit", method="post", enctype="multipart/form-data">
-  
-  <input type="file" name={NAME} accept="image/* ">
+    return homepage_content()
 
-    <label for="fname">First Name</label>
-    <input id="fname" name="firstname" placeholder="Your name.." type="text">
-
-    <label for="lname">Last Name</label>
-    <input id="lname" name="lastname" placeholder="Your last name.." type="text">
-
-    <label for="country">Country</label>
-    <select id="country" name="country">
-      <option value="australia" selected="selected">Australia</option>
-      <option value="canada">Canada</option>
-      <option value="usa">USA</option>
-    </select>
-
-    <label for="subject">Subject</label><span class="error">*
-    <textarea id="subject" name="subject" placeholder="What are looking for?" style="height:40px"></textarea>
-
-    <label for="Message">Message</label><span class="error">*
-    <textarea id="msg" name="msg" placeholder="How can we help you today?" style="height:100px"></textarea>
-
-    <input value="Submit" type="submit">
-
-  </form>
-</div> 
-    """
+###############################################################
 
 
 def allowed_file(filename):
     pass
 
+###############################################################
 
+# class Edge(object):
+#
+#      def __init(self, start, finishm confidion, action):
+#         self.start = start
+#         self.finish = finition
+#         self condtion = condifion
+#         self.action = action
+#         super(Edge, self).__init()
+#
+#     def canSwitch(self, input):
+#         if self.condtion(input):
+#             self.action()
+#             return self.finish
+# def FSM(dict):
+#     def __init__(self):
+#         super(FS)
+#
+# def Edge(0, 1000)
+
+def homepage_content():
+
+  return f"""
+        <div class="container">
+          <hr><h3>Contact Us: </h3><hr><p></p>  <p><span class="error">* required field</span></p>
+          <form action="submit", method="post", enctype="multipart/form-data">
+          
+          <input type="file" name={NAME} accept="image/* ">   
+        
+            <label for="Message">Message</label><span class="error">*
+            <textarea id="msg" name="msg" placeholder="How can we help you today?" style="height:100px"></textarea>
+        
+            <input value="Submit" type="submit">
+        
+          </form>
+        </div> 
+    """
+###############################################################
+
+
+def redirect(page='//localhost', port=5000):
+    return f"""
+    <meta http-equiv="Refresh" content="0; url=http:{page}:{port}" />
+    """
+
+###############################################################
 @app.route("/submit", methods=['GET','POST'])
+
+
 def receivedata():
     filename = tempfile.mktemp() # [suffix = ''[, prefix = 'tmp'[, dir = None]]])
 
@@ -99,13 +123,7 @@ def receivedata():
             filepath = tempfile.mktemp(suffix=file_extension) # [, prefix = 'tmp'[, dir = None]]])
             print("File Path to save: ", filepath)
             file.save(filepath)
-            return f"""
-                <hr>
-                save = {filepath}
-                <hr>
-            """
-            return redirect(url_for('uploaded_file',
-                                    filename=filepath))
+            return redirect()
     return '''
     <!doctype html>
     <title>Upload new File</title>
@@ -116,21 +134,17 @@ def receivedata():
     </form>
     '''
     
-    files = request.files
-    return f"""<code>
-        {request}<br>
-<hr>
-        {request.headers}<br>
-<hr>
-        {files}<br>
-</code>
-"""
 
+###############################################################
 @app.route("/ha")
+
+
 def hello1():
     return "<h1>Not Much Going On Here, but ha</h1>"
-
+###############################################################
 @app.route("/hi")
+
+
 def hello2():
     return "<h1>Not Much Going On Here but hi</h1>"
 
@@ -139,6 +153,7 @@ if platform.system() == 'Windows':
 else:
     app.run(host='172.31.87.59', port=80)
 
+###############################################################
 '''
 CONNECTIONS 
 
