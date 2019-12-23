@@ -1,3 +1,4 @@
+from pprint import pprint
 from flask import Flask, request
 import platform
 import tempfile
@@ -65,19 +66,28 @@ def allowed_file(filename):
 # def Edge(0, 1000)
 
 def homepage_content():
-
   return f"""
         <div class="container">
-          <hr><h3>Contact Us: </h3><hr><p></p>  <p><span class="error">* required field</span></p>
+          
+          <hr>
+          <p><span class="error">* required field</span></p>
+          
           <form action="submit", method="post", enctype="multipart/form-data">
           
-          <input type="file" name={NAME} accept="image/* ">   
-        
-            <label for="Message">Message</label><span class="error">*
-            <textarea id="msg" name="msg" placeholder="How can we help you today?" style="height:100px"></textarea>
-        
-            <input value="Submit" type="submit">
-        
+              <input type="file" name={NAME} accept="image/* ">   <br><br><br>
+    
+              Nickname:<br>
+              <input type="text" name="Nickname" title="Select New if New nickname">
+    
+    
+              <p>New?</p>
+              <input type="checkbox" name="new" value="yes" title="Select if new"> Yes <br><br>
+                    
+              <label for="Comment">Comment</label><span class="error"> <br>
+              <textarea id="msg" name="msg" placeholder="Image Details..." style="height:100px"></textarea>
+            
+              <input value="Submit" type="submit">
+            
           </form>
         </div> 
     """
@@ -90,13 +100,42 @@ def redirect(page='//localhost', port=5000):
     """
 
 ###############################################################
+
+def completeDb(data):
+
+    if data.get('New'):
+        author = data.get('Nickname')
+
+        if db_connect_test.getUserId(author):
+            raise RuntimeError(f"{author} Nickname Exists")
+
+        author_id = db_connect_test.createNewId(author)
+
+    filepath = data.get('filepath')
+    if filepath:
+        ref_data_id = db_connect_test.createNewDataRecord(filepath)
+
+    comment = data.get('Comment')
+    if comment:
+        data_id = db_connect_test.createNewDataRecord(comment, "comment")
+    else:
+        data_id = ref_data_id
+
+    if data_id and ref_data_id and author_id:
+        db_connect_test.createNewRecord(author_id, data_id, ref_data_id)
+
+    pprint(data)
+
 @app.route("/submit", methods=['GET','POST'])
-
-
 def receivedata():
     filename = tempfile.mktemp() # [suffix = ''[, prefix = 'tmp'[, dir = None]]])
 
     if request.method == 'POST':
+
+        data = request.form.to_dict()
+
+
+
         # check if the post request has the file part
         if NAME not in request.files:
             flash('No file part')
@@ -123,6 +162,8 @@ def receivedata():
             filepath = tempfile.mktemp(suffix=file_extension) # [, prefix = 'tmp'[, dir = None]]])
             print("File Path to save: ", filepath)
             file.save(filepath)
+            data['filepath'] = filepath
+            completeDb(data)
             return redirect()
     return '''
     <!doctype html>
@@ -133,7 +174,7 @@ def receivedata():
       <input type=submit value=Upload>
     </form>
     '''
-    
+
 
 ###############################################################
 @app.route("/ha")
@@ -292,4 +333,5 @@ elif input("Create new ID? y/n: ").lower() == 'y'.strip():
 
 if input("Add new image? y/n: ").lower() == 'y'.strip():
     # imgData = addImg()
+
     print("Need Function")

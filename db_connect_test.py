@@ -78,8 +78,10 @@ def createNewId(name):
     query = ("INSERT INTO `mvp`.`author` (nickname) VALUES (%s)")
     cursor.execute(query, name)
     conn.commit()
+    lastrowid = cursor.lastrowid
     cursor.close()
     close(conn)
+    return lastrowid
 ######################################################################
 def createNewDataRecord(path, type_id = 'image'):
     conn = connect()
