@@ -121,10 +121,10 @@ def homepage_content():
 ###############################################################
 
 
-def redirect(page='', port=port_num):
+def redirect(page=host, port=port_num):
 
     return f"""
-    <meta http-equiv="Refresh" content="0; url=http:{page}:{port}" />
+    <meta http-equiv="Refresh" content="0; url=http://{page}:{port}" />
     """
 
 ###############################################################
