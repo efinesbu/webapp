@@ -7,15 +7,24 @@ from mysql.connector import Error, MySQLConnection
 from python_mysql_dbconfig import read_db_config
 import db_connect_test
 import socket
+import boto3
 
 ###############################################################
 app = Flask(__name__)
-host = socket.gethostname()
+internalhost = socket.gethostname()
 
 if platform.system() == 'Windows':
     port_num = 5000 # Free Port for local testing purposes
+    publichost = internalhost
 else:
     port_num = 80 # Standard HTTP Port on Cloud
+    ec2 = boto3.client('ec2')
+    filters = [
+        {'Name': 'domain',
+         'Values': ['vpc']}
+    ]
+    response = ec2.describe_addresses(Filters = filters)
+    print(response)
 ###############################################################
 class InvalidUsage(Exception):
     status_code = 400
@@ -121,7 +130,7 @@ def homepage_content():
 ###############################################################
 
 
-def redirect(page=host, port=port_num):
+def redirect(page=internalhost, port=port_num):
 
     return f"""
     <meta http-equiv="Refresh" content="0; url=http://{page}:{port}" />
@@ -320,7 +329,7 @@ def createNewId():
 
 
 
-app.run(host=host, port=port_num)
+app.run(host=internalhost, port=port_num)
 
 
 
