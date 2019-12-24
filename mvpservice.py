@@ -8,6 +8,7 @@ from python_mysql_dbconfig import read_db_config
 import db_connect_test
 import socket
 import boto3
+import urllib.request
 
 ###############################################################
 app = Flask(__name__)
@@ -18,13 +19,14 @@ if platform.system() == 'Windows':
     publichost = internalhost
 else:
     port_num = 80 # Standard HTTP Port on Cloud
-    ec2 = boto3.client('ec2', region_name='us-east-1')
-    filters = [
-        {'Name': 'domain',
-         'Values': ['vpc']}
-    ]
-    response = ec2.describe_addresses(Filters=filters)
-    print(response)
+    # ec2 = boto3.client('ec2', region_name='us-east-1')
+    # filters = [
+    #     {'Name': 'domain',
+    #      'Values': ['vpc']}
+    # ]
+    # response = ec2.describe_addresses(Filters=filters)
+    # print(response)
+    print(urllib.request.urlopen("http://169.254.169.254/latest/meta-data/public-ipv4").read())
 ###############################################################
 class InvalidUsage(Exception):
     status_code = 400
