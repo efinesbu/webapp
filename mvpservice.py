@@ -18,12 +18,12 @@ if platform.system() == 'Windows':
     publichost = internalhost
 else:
     port_num = 80 # Standard HTTP Port on Cloud
-    ec2 = boto3.client('ec2')
+    ec2 = boto3.client('ec2', region_name='us-east-1')
     filters = [
         {'Name': 'domain',
          'Values': ['vpc']}
     ]
-    response = ec2.describe_addresses(Filters = filters)
+    response = ec2.describe_addresses(Filters=filters)
     print(response)
 ###############################################################
 class InvalidUsage(Exception):
