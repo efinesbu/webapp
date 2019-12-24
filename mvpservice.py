@@ -14,11 +14,11 @@ internalhost = socket.gethostname()
 
 if platform.system() == 'Windows':
     port_num = 5000 # Free Port for local testing purposes
-    publichost = internalhost
+    publichost = internalhost # Not Used Currently
 else:
-    from ec2_metadata import ec2_metadata
+    from ec2_metadata import ec2_metadata # Not Used Currently
     port_num = 80 # Standard HTTP Port on Cloud
-    publichost = ec2_metadata.public_ipv4
+    publichost = ec2_metadata.public_ipv4 # Not Used Currently
 
 ###############################################################
 class InvalidUsage(Exception):
@@ -53,9 +53,10 @@ def homepage():
 <hr>
         {request.headers}<br>
 </code>
-    <ol>
-      <li> <a href="upload">upload</a></li>
-    </ol>
+    <ul>
+        <lh> Upload a converation screenshot </lh>
+            <li> <a href="upload">upload</a></li>
+    </ul>
     """
 ###############################
 
