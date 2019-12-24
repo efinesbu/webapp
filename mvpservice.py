@@ -121,7 +121,7 @@ def homepage_content():
 ###############################################################
 
 
-def redirect(page=host, port=port_num):
+def redirect(page='/', port=port_num):
 
     return f"""
     <meta http-equiv="Refresh" content="0; url=http:{page}:{port}" />
@@ -318,7 +318,7 @@ def createNewId():
     cursor.close()
     close(conn)
 
-# host = socket.gethostname()
+
 
 app.run(host=host, port=port_num)
 
