@@ -18,15 +18,8 @@ if platform.system() == 'Windows':
     publichost = internalhost
 else:
     port_num = 80 # Standard HTTP Port on Cloud
-    # ec2 = boto3.client('ec2', region_name='us-east-1')
-    # filters = [
-    #     {'Name': 'domain',
-    #      'Values': ['vpc']}
-    # ]
-    # response = ec2.describe_addresses(Filters=filters)
-    # print(response)
-
-    print("IPV4 from request: ", urllib.request.urlopen("http://169.254.169.254/latest/meta-data/public-ipv4").read())
+    publichost = urllib.request.urlopen("http://169.254.169.254/latest/meta-data/public-ipv4").read()
+    print("Public IPV4: ", publichost)
 
     # print("Public IPV4", ec2_metadata.public_ipv4)
     # print("Private IPV4", ec2_metadata.private_ipv4)
@@ -136,7 +129,7 @@ def homepage_content():
 ###############################################################
 
 
-def redirect(page=internalhost, port=port_num):
+def redirect(page=publichost, port=port_num):
 
     return f"""
     <meta http-equiv="Refresh" content="0; url=http://{page}:{port}" />
