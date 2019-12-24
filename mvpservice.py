@@ -6,10 +6,17 @@ import os
 from mysql.connector import Error, MySQLConnection
 from python_mysql_dbconfig import read_db_config
 import db_connect_test
+import socket
 
 ###############################################################
 app = Flask(__name__)
+host = socket.gethostname()
 
+if platform.system() == 'Windows':
+    port_num = 5000 # Free Port for local testing purposes
+else:
+    port_num = 80 # Standard HTTP Port on Cloud
+###############################################################
 class InvalidUsage(Exception):
     status_code = 400
 
@@ -114,7 +121,8 @@ def homepage_content():
 ###############################################################
 
 
-def redirect(page='//localhost', port=5000):
+def redirect(page=host, port=port_num):
+
     return f"""
     <meta http-equiv="Refresh" content="0; url=http:{page}:{port}" />
     """
@@ -206,10 +214,9 @@ def hello2():
     return "<h1>Not Much Going On Here but hi</h1>"
 ###############################################################
 
-if platform.system() == 'Windows':
-    app.run(host='0.0.0.0', port=5000)
-else:
-    app.run(host='172.31.87.59', port=80)
+
+
+
 
 ###############################################################
 '''
@@ -310,6 +317,13 @@ def createNewId():
             break
     cursor.close()
     close(conn)
+
+# host = socket.gethostname()
+
+app.run(host=host, port=port_num)
+
+
+
 
 ########################################################################################################################
 #MAIN
