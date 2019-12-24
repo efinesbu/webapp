@@ -7,9 +7,9 @@ from mysql.connector import Error, MySQLConnection
 from python_mysql_dbconfig import read_db_config
 import db_connect_test
 import socket
-import boto3
-import urllib.request
-
+# import boto3
+# import urllib.request
+from ec2_metadata import ec2_metadata
 ###############################################################
 app = Flask(__name__)
 internalhost = socket.gethostname()
@@ -26,7 +26,10 @@ else:
     # ]
     # response = ec2.describe_addresses(Filters=filters)
     # print(response)
-    print(urllib.request.urlopen("http://169.254.169.254/latest/meta-data/public-ipv4").read())
+
+    # print(urllib.request.urlopen("http://169.254.169.254/latest/meta-data/public-ipv4").read())
+
+    print(ec2_metadata.public_ipv4)
 ###############################################################
 class InvalidUsage(Exception):
     status_code = 400
