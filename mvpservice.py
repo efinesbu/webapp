@@ -1,5 +1,5 @@
 from pprint import pprint
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect
 import platform
 import tempfile
 import os
@@ -7,9 +7,7 @@ from mysql.connector import Error, MySQLConnection
 from python_mysql_dbconfig import read_db_config
 import db_connect_test
 import socket
-import urllib.request
-from ec2_metadata import ec2_metadata
-import requests
+
 ###############################################################
 app = Flask(__name__)
 internalhost = socket.gethostname()
@@ -18,15 +16,10 @@ if platform.system() == 'Windows':
     port_num = 5000 # Free Port for local testing purposes
     publichost = internalhost
 else:
+    from ec2_metadata import ec2_metadata
     port_num = 80 # Standard HTTP Port on Cloud
-    # publichost = urllib.request.urlopen("http://169.254.169.254/latest/meta-data/public-ipv4").read()
-    # publichost = ip = requests.get("http://169.254.169.254/latest/meta-data/public-ipv4").content
     publichost = ec2_metadata.public_ipv4
-    print("Public IPV4: ", publichost)
 
-    # print("Public IPV4", ec2_metadata.public_ipv4)
-    # print("Private IPV4", ec2_metadata.private_ipv4)
-    # print("IPV4", ec2_metadata.region)
 ###############################################################
 class InvalidUsage(Exception):
     status_code = 400
@@ -132,11 +125,6 @@ def homepage_content():
 ###############################################################
 
 
-def redirect(page=publichost, port=port_num):
-
-    return f"""
-    <meta http-equiv="Refresh" content="0; url=http://{page}:{port}" />
-    """
 
 ###############################################################
 
@@ -203,7 +191,7 @@ def receivedata():
             file.save(filepath)
             data['filepath'] = filepath
             completeDb(data)
-            return redirect()
+            return redirect('/')
     return '''
     <!doctype html>
     <title>Upload new File</title>
