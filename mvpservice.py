@@ -9,6 +9,7 @@ import db_connect_test
 import socket
 import urllib.request
 # from ec2_metadata import ec2_metadata
+import requests
 ###############################################################
 app = Flask(__name__)
 internalhost = socket.gethostname()
@@ -18,7 +19,8 @@ if platform.system() == 'Windows':
     publichost = internalhost
 else:
     port_num = 80 # Standard HTTP Port on Cloud
-    publichost = urllib.request.urlopen("http://169.254.169.254/latest/meta-data/public-ipv4").read()
+    # publichost = urllib.request.urlopen("http://169.254.169.254/latest/meta-data/public-ipv4").read()
+    publichost = ip = requests.get("http://169.254.169.254/latest/meta-data/public-ipv4").content
     print("Public IPV4: ", publichost)
 
     # print("Public IPV4", ec2_metadata.public_ipv4)
