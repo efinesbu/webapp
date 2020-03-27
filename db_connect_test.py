@@ -1,3 +1,14 @@
+
+########################################################################################################################
+
+# GOAL: Dating Advice Platform. Users submit conversations screenshots (Images) and Advisors leave reply recommendations (text comments)
+
+# This script contains the back-end functionality to store image metadata in AWS RDS and the actual file in S3 (S3 functionality not 
+# finished)
+# The front-end code is in the webservices folder
+
+########################################################################################################################
+
 from mysql.connector import Error, MySQLConnection
 from python_mysql_dbconfig import read_db_config
 
