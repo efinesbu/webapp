@@ -1,3 +1,9 @@
+#############################################################################################################################
+
+# This is a standard DF Config file script for security, preventing the need to keep DB passwords in the main scripts
+
+#############################################################################################################################
+
 from configparser import ConfigParser
 
 def read_db_config(filename='config.ini', section='mysql'):
