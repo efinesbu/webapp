@@ -1,3 +1,13 @@
+########################################################################################################################
+
+# GOAL: Dating Advice Platform. Users submit conversations screenshots (Images) and Advisors leave reply recommendations (text comments)
+
+# This is the front-end code using Flask that allows users to go to a URL, and add Images/Comments to/from the back-end
+# mvpcloud  file contains the back-end functionality to store image metadata in AWS RDS and the actual file in S3 
+
+########################################################################################################################
+
+
 from pprint import pprint
 from flask import Flask, request, jsonify, redirect
 import platform
