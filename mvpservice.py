@@ -15,8 +15,9 @@ import tempfile
 import os
 from mysql.connector import Error, MySQLConnection
 from python_mysql_dbconfig import read_db_config
-import db_connect_test
+import db_backend
 import socket
+
 
 ###############################################################
 app = Flask(__name__)
@@ -138,7 +139,7 @@ def homepage_content():
 
 
 ###############################################################
-
+db_connect_test = db_backend
 def completeDb(data):
     author = data.get('Nickname')
     if data.get('new'):
